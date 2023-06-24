@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package metrics
+package hmetrics
 
 import (
 	"bytes"
@@ -179,4 +179,3 @@ func writeLabels(w *bytes.Buffer, labels map[string]string,
 	}
 	w.WriteString("}")
 }
-
