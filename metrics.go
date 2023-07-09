@@ -25,24 +25,26 @@ import (
 )
 
 type Label struct {
-	Name  string
-	Value string
+	Name string
+	Item string
 }
 
 type MetricCounterMap interface {
-	Add(Label, float64)
+	Add(string, string, float64)
+	Set(string, string, float64)
 }
 
 type MetricGaugeMap interface {
-	Add(Label, float64)
+	Add(string, string, float64)
+	Set(string, string, float64)
 }
 
 type MetricHistogramMap interface {
-	Add(Label, float64)
+	Add(string, string, float64)
 }
 
 type MetricComplexMap interface {
-	Add(name, value string, c float64, g float64, t time.Duration)
+	Add(name, item string, c float64, g float64, t time.Duration)
 }
 
 var (
@@ -119,28 +121,32 @@ type counterMap struct {
 	metric *metrics.MetricMap[Label]
 }
 
-func (it *counterMap) Add(l Label, v float64) {
-	it.metric.Get(l).Add(v)
+func (it *counterMap) Add(name, item string, v float64) {
+	it.metric.Get(Label{name, item}).Add(v)
+}
+
+func (it *counterMap) Set(name, item string, v float64) {
+	it.metric.Get(Label{name, item}).Set(v)
 }
 
 type gaugeMap struct {
 	metric *metrics.MetricMap[Label]
 }
 
-func (it *gaugeMap) Add(l Label, v float64) {
-	it.metric.Get(l).Add(v)
+func (it *gaugeMap) Add(name, item string, v float64) {
+	it.metric.Get(Label{name, item}).Add(v)
 }
 
-func (it *gaugeMap) Set(l Label, v float64) {
-	it.metric.Get(l).Set(v)
+func (it *gaugeMap) Set(name, item string, v float64) {
+	it.metric.Get(Label{name, item}).Set(v)
 }
 
 type histogramMap struct {
 	metric *metrics.MetricMap[Label]
 }
 
-func (it *histogramMap) Add(l Label, v float64) {
-	it.metric.Get(l).Add(v)
+func (it *histogramMap) Add(name, item string, v float64) {
+	it.metric.Get(Label{name, item}).Put(v)
 }
 
 type complexMap struct {
@@ -179,15 +185,15 @@ func RegisterComplexMap(name, help string, buckets []float64) MetricComplexMap {
 	return m
 }
 
-func (it *complexMap) Add(name, value string, c, g float64, h time.Duration) {
-	l := Label{name, value}
+func (it *complexMap) Add(name, item string, c, g float64, h time.Duration) {
+	l := Label{name, item}
 	if c > 0 {
 		it.counter.Get(l).Add(c)
 	}
 	if g != 0 {
 		it.gauge.Get(l).Add(g)
 	}
-	if h >= 1e3 {
+	if h >= 0 {
 		// it.histogram.Get(l).Put(float64(h / 1e3))
 		it.histogram.Get(l).Put(h.Seconds())
 	}

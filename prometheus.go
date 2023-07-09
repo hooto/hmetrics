@@ -146,18 +146,18 @@ func translateMetrics(w *bytes.Buffer, metrics []*metrics.MetricSnapshot) string
 
 // writeEntry generates a metric definition entry.
 func writeEntry(w *bytes.Buffer, metricName string, value float64, suffix string,
-	labels map[string]string, extraLabelName string, extraLabelValue float64) {
+	labels map[string]string, extraLabelName string, extraLabelItem float64) {
 	w.WriteString(metricName)
 	if len(suffix) > 0 {
 		w.WriteString(suffix)
 	}
-	writeLabels(w, labels, extraLabelName, extraLabelValue)
+	writeLabels(w, labels, extraLabelName, extraLabelItem)
 	w.WriteString(" " + strconv.FormatFloat(value, 'f', -1, 64) + "\n")
 }
 
 // writeEntry generates the metric labels.
 func writeLabels(w *bytes.Buffer, labels map[string]string,
-	extraLabelName string, extraLabelValue float64) {
+	extraLabelName string, extraLabelItem float64) {
 	if len(labels) == 0 && extraLabelName == "" {
 		return
 	}
@@ -175,7 +175,7 @@ func writeLabels(w *bytes.Buffer, labels map[string]string,
 	if len(extraLabelName) > 0 {
 		// Set for a histogram metric only.
 		w.WriteString(separator + extraLabelName + `="`)
-		w.WriteString(strconv.FormatFloat(extraLabelValue, 'f', -1, 64) + "\"")
+		w.WriteString(strconv.FormatFloat(extraLabelItem, 'f', -1, 64) + "\"")
 	}
 	w.WriteString("}")
 }
